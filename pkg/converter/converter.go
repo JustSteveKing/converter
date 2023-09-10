@@ -17,11 +17,17 @@ func GeneratePHPDTO(data map[string]interface{}, className string) string {
 }
 
 func getType(value interface{}) string {
-	switch value.(type) {
+	switch v := value.(type) {
 	case string:
 		return "string"
 	case float64:
+		// Check if the float64 value is actually an integer.
+		if float64(int(v)) == v {
+			return "int"
+		}
 		return "float"
+	case int, int32, int64:
+		return "int"
 	case bool:
 		return "bool"
 	case map[string]interface{}:
