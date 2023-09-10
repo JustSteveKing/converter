@@ -26,7 +26,7 @@ var yamlCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(jsonCmd)
+	rootCmd.AddCommand(yamlCmd)
 
 	// Adding flags for our command
 	yamlCmd.Flags().StringVarP(&className, "class", "c", "", "Name of the DTO class (required)")
