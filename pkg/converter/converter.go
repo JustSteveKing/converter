@@ -1,9 +1,19 @@
 package converter
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
+
+type SchemaProperty struct {
+	Type string `json:"type"`
+}
+
+type JSONSchema struct {
+	Properties map[string]SchemaProperty `json:"properties"`
+	Type       string                    `json:"type"`
+}
 
 func GeneratePHPDTO(data map[string]interface{}, className string) string {
 	var properties []string
@@ -51,4 +61,41 @@ func createDTOClass(className string, properties []string) string {
 	builder.WriteString("}")
 
 	return builder.String()
+}
+
+func GeneratePHPFromSchema(schema string, className string) (string, error) {
+	var schemaObj JSONSchema
+	if err := json.Unmarshal([]byte(schema), &schemaObj); err != nil {
+		return "", err
+	}
+
+	if schemaObj.Properties == nil {
+		return "", fmt.Errorf("no properties found in the schema")
+	}
+
+	data := make(map[string]interface{})
+	for key, propData := range schemaObj.Properties {
+		data[key] = mapJSONSchemaTypeToPlaceholderValue(propData.Type)
+	}
+
+	return GeneratePHPDTO(data, className), nil
+}
+
+func mapJSONSchemaTypeToPlaceholderValue(dataType string) interface{} {
+	switch dataType {
+	case "string":
+		return ""
+	case "number":
+		return 0.0
+	case "integer":
+		return 0
+	case "boolean":
+		return false
+	case "array":
+		return []interface{}{}
+	case "object":
+		return map[string]interface{}{}
+	default:
+		return nil
+	}
 }
